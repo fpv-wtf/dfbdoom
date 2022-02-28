@@ -1,0 +1,11 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: Fusion IPC
+Description: High Level IPC Mechanisms
+Version: 1.6.0
+Requires: direct
+Libs: -L${libdir} -lfusion
+Cflags: -I${prefix}/include/directfb

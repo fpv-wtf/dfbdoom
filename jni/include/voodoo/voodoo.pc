@@ -1,0 +1,11 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: Voodoo
+Description: Interface based network transparency (like CORBA)
+Version: 1.6.0
+Requires: direct
+Libs: -L${libdir} -lvoodoo
+Cflags: -I${prefix}/include/directfb
