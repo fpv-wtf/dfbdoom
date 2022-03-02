@@ -5,6 +5,7 @@
 #include "m_argv.h"
 #include "d_main.h"
 
+
 int main(int argc, const char** argv)
 {
     myargc = argc;
@@ -22,6 +23,9 @@ int main(int argc, const char** argv)
 
     // tcsetattr(0, TCSANOW, &new_settings);
 
+     /* get an interface to the primary keyboard and create an
+        input buffer for it */
+        
     D_DoomMain();
 
     // tcsetattr(0, TCSANOW, &initial_settings);
@@ -29,7 +33,7 @@ int main(int argc, const char** argv)
     return 0;
 }
 
-void I_StartTic (void)
+/*void I_StartTic (void)
 {
     // event_t event = {0,0,0,0};
     // char key = getchar();
@@ -48,4 +52,4 @@ void I_StartTic (void)
     //     event.data1 = key;
     //     D_PostEvent(&event);
     // }
-}
+}*/

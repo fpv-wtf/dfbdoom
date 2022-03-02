@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include "v_video.h"
 #include "m_argv.h"
+#include "d_event.h"
+
 
 //static FILE* fbfd = 0;
 //static struct fb_var_screeninfo vinfo;
@@ -29,7 +31,12 @@ static IDirectFBSurface     *primary;
 static IDirectFBPalette     *palette;
 
 /* Input interfaces: device and its buffer */
-static IDirectFBEventBuffer *events;
+static IDirectFBEventBuffer *eventsbuffer;
+
+IDirectFBInputDevice    *keyboard;
+IDirectFBEventBuffer    *keybuffer;
+DFBInputEvent            devt;
+
 
 static int screen_width, screen_height;
 
@@ -49,6 +56,8 @@ void I_InitGraphics (void)
       DFBResult              err;
      DFBSurfaceDescription  sdsc;
      DFBSurfaceDescription  pdsc;
+    
+
 
      DFBCHECK(DirectFBInit( &myargc, &myargv ));
 
@@ -56,8 +65,8 @@ void I_InitGraphics (void)
      DFBCHECK(DirectFBCreate( &dfb ));
 
      /* create an event buffer for all devices */
-     DFBCHECK(dfb->CreateInputEventBuffer( dfb, DICAPS_ALL,
-                                           DFB_FALSE, &events ));
+     /*DFBCHECK(dfb->CreateInputEventBuffer( dfb, DICAPS_ALL,
+                                           DFB_FALSE, &eventsbuffer ));*/
 
      /* set our cooperative level to DFSCL_FULLSCREEN
         for exclusive access to the primary layer */
@@ -85,14 +94,116 @@ void I_InitGraphics (void)
     /* Figure out the size of the screen in bytes */
     screensize = screen_width * screen_height * 32 / 8;
     printf("Screen width is %d, height is %d size is %d\n",screen_width, screen_height,screensize);
+
+        
+    DFBCHECK(dfb->GetInputDevice( dfb, DIDID_ANY, &keyboard ));
+    DFBCHECK(keyboard->CreateEventBuffer( keyboard, &keybuffer ));
+
             
+}
+
+
+//
+//  Translates the key currently in dfbinputevent
+//
+
+int dlatekey(void)
+{
+
+    int rc;
+
+    switch(rc = devt.key_symbol)
+    {
+      case DIKS_CURSOR_LEFT:	rc = KEY_LEFTARROW;	break;
+      case DIKS_CURSOR_RIGHT:	rc = KEY_RIGHTARROW;	break;
+      case DIKS_CURSOR_DOWN:	rc = KEY_DOWNARROW;	break;
+      case DIKS_CURSOR_UP:	rc = KEY_UPARROW;	break;
+      case DIKS_ESCAPE:	rc = KEY_ESCAPE;	break;
+      case DIKS_RETURN:	rc = KEY_ENTER;		break;
+      case DIKS_TAB:	rc = KEY_TAB;		break;
+      case DIKS_F1:	rc = KEY_F1;		break;
+      case DIKS_F2:	rc = KEY_F2;		break;
+      case DIKS_F3:	rc = KEY_F3;		break;
+      case DIKS_F4:	rc = KEY_F4;		break;
+      case DIKS_F5:	rc = KEY_F5;		break;
+      case DIKS_F6:	rc = KEY_F6;		break;
+      case DIKS_F7:	rc = KEY_F7;		break;
+      case DIKS_F8:	rc = KEY_F8;		break;
+      case DIKS_F9:	rc = KEY_F9;		break;
+      case DIKS_F10:	rc = KEY_F10;		break;
+      case DIKS_F11:	rc = KEY_F11;		break;
+      case DIKS_F12:	rc = KEY_F12;		break;
+	
+      case DIKS_BACKSPACE:
+      case DIKS_DELETE:	rc = KEY_BACKSPACE;	break;
+
+      case DIKS_PAUSE:	rc = KEY_PAUSE;		break;
+
+      case DIKS_EQUALS_SIGN:	rc = KEY_EQUALS;	break;
+
+      case DIKS_MINUS_SIGN:	rc = KEY_MINUS;		break;
+
+      case DIKS_SHIFT:
+	rc = KEY_RSHIFT;
+	break;
+	
+      case DIKS_CONTROL:
+	rc = KEY_RCTRL;
+	break;
+	
+      case DIKS_ALT:
+      case DIKS_ALTGR:
+	rc = KEY_RALT;
+	break;
+	
+      default:
+	if (rc >= DIKS_SPACE && rc <= DIKS_TILDE)
+	    rc = rc - DIKS_SPACE + ' ';
+	if (rc >= 'A' && rc <= 'Z')
+	    rc = rc - 'A' + 'a';
+	break;
+    }
+
+    return rc;
+
+}
+
+
+void I_StartTic (void)
+{
+
+    event_t event;
+    while(keybuffer->GetEvent( keybuffer, DFB_EVENT(&devt)) == DFB_OK) {
+        printf("Key event type %d code %d id %d symbol %d\n", devt.type, devt.key_code, devt.key_id, devt.key_symbol);
+
+        switch (devt.type)
+        {
+        case DIET_KEYPRESS:
+
+        event.type = ev_keydown;
+        event.data1 = dlatekey();
+        D_PostEvent(&event);
+        // fprintf(stderr, "k");
+        break;
+        case DIET_KEYRELEASE:
+        //printf("Key up %d\n",devt.key_symbol);
+
+        event.type = ev_keyup;
+        event.data1 = dlatekey();
+        D_PostEvent(&event);
+        // fprintf(stderr, "ku");
+        break;
+        }
+        
+    }
 }
 
 
 void I_ShutdownGraphics(void)
 {
-     events->Release( events );
-     dfb->Release( dfb );
+    eventsbuffer->Release( eventsbuffer );
+    keyboard->Release( keyboard );
+    dfb->Release( dfb );
 
 }
 
