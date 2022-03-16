@@ -1,4 +1,4 @@
-## sfbdoom for DJI FPV Goggles
+## dfbdoom for DJI FPV Goggles
 Directfb Doom, forked from [fbdoom](https://github.com/stoffera/fbdoom "fbdoom").
 
 ## Installing
