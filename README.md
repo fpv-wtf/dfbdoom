@@ -4,7 +4,7 @@ Directfb Doom, forked from [fbdoom](https://github.com/stoffera/fbdoom "fbdoom")
 ## Installing
 Grab the latest binary from [Releases](https://github.com/fpv-wtf/dfbdoom/releases) and have your Doom WAD in the same folder.
 ```
-adb push dbfdoom /blackbox
+adb push dfbdoom /blackbox
 #mind the lower case target file name!
 adb push DOOM.WAD /blackbox/doom.wad
 adb shell chmod 755 /blackbox/dfbdoom
