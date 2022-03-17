@@ -2,7 +2,7 @@
 Directfb Doom, forked from [fbdoom](https://github.com/stoffera/fbdoom "fbdoom").
 
 ## Installing
-Grab the latest binary from [Releases](https://github.com/fpv-wtf/dfbdoom/releases) and have your Doom WAD in the same folder.
+Grab the latest binary from [Releases](https://github.com/fpv-wtf/dfbdoom/releases) and have your Doom 1.9 WAD in the same folder.
 ```
 adb push dfbdoom /blackbox
 #mind the lower case target file name!
@@ -42,7 +42,7 @@ Theoretically USB keyboards should also be supported by DirectFB/evdev on V2s. I
 You need: 
 - NDK in your host path
 - adb connected
-- a Doom WAD with a lower case filename in /blackbox/
+- a Doom 1.9 WAD with a lower case filename in /blackbox/
 
 Then run:
 ```
