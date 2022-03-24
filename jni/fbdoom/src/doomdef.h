@@ -255,7 +255,7 @@ typedef enum
 #define KEY_UPARROW	0xad
 #define KEY_DOWNARROW	0xaf
 #define KEY_ESCAPE	27
-#define KEY_ENTER	13
+#define KEY_ENTER	0xc8 
 #define KEY_TAB		9
 #define KEY_F1		(0x80+0x3b)
 #define KEY_F2		(0x80+0x3c)
@@ -281,7 +281,10 @@ typedef enum
 #define KEY_RALT	(0x80+0x38)
 
 #define KEY_LALT	KEY_RALT
-
+//new defines
+#define KEY_SPACEBAR 32
+#define KEY_SWITCH_WEAPONS 233
+#define KEY_GOD_MODE 88
 
 
 // DOOM basic types (boolean),

@@ -39,6 +39,11 @@ DFBInputEvent            devt;
 
 
 static int screen_width, screen_height;
+/* new defines for using goggles joystick and keys */
+#define SYMPOL_KEY_CHANNEL_UP 62724
+#define SYMPOL_KEY_LEFT_JOY 61521
+#define SYMPOL_KEY_RIGHT_JOY 61530
+#define SYMPOL_KEY_BACK 61450
 
 /* macro for a safe call to DirectFB functions */
 #define DFBCHECK(x...) \
@@ -114,87 +119,229 @@ int dlatekey(void)
 
     switch(rc = devt.key_symbol)
     {
-      case DIKS_CURSOR_LEFT:	rc = KEY_LEFTARROW;	break;
-      case DIKS_CURSOR_RIGHT:	rc = KEY_RIGHTARROW;	break;
-      case DIKS_CURSOR_DOWN:	rc = KEY_DOWNARROW;	break;
-      case DIKS_CURSOR_UP:	rc = KEY_UPARROW;	break;
-      case DIKS_ESCAPE:	rc = KEY_ESCAPE;	break;
-      case DIKS_RETURN:	rc = KEY_ENTER;		break;
-      case DIKS_TAB:	rc = KEY_TAB;		break;
-      case DIKS_F1:	rc = KEY_F1;		break;
-      case DIKS_F2:	rc = KEY_F2;		break;
-      case DIKS_F3:	rc = KEY_F3;		break;
-      case DIKS_F4:	rc = KEY_F4;		break;
-      case DIKS_F5:	rc = KEY_F5;		break;
-      case DIKS_F6:	rc = KEY_F6;		break;
-      case DIKS_F7:	rc = KEY_F7;		break;
-      case DIKS_F8:	rc = KEY_F8;		break;
-      case DIKS_F9:	rc = KEY_F9;		break;
-      case DIKS_F10:	rc = KEY_F10;		break;
-      case DIKS_F11:	rc = KEY_F11;		break;
-      case DIKS_F12:	rc = KEY_F12;		break;
-	
-      case DIKS_BACKSPACE:
-      case DIKS_DELETE:	rc = KEY_BACKSPACE;	break;
+      case SYMPOL_KEY_LEFT_JOY:
+        rc = KEY_LEFTARROW;
+        break;
+    case SYMPOL_KEY_RIGHT_JOY:
+        rc = KEY_RIGHTARROW;
+        break;
+    case DIKS_CURSOR_DOWN:
+        rc = KEY_DOWNARROW;
+        break;
+    case SYMPOL_KEY_CHANNEL_UP:
+        rc = KEY_UPARROW;
+        break;
+    case DIKS_ESCAPE:
+        rc = KEY_ESCAPE;
+        break;
+    case DIKS_RETURN:
+        rc = KEY_ENTER;
+        break;
+    case DIKS_TAB:
+        rc = KEY_TAB;
+        break;
+    case DIKS_F1:
+        rc = KEY_F1;
+        break;
+    case DIKS_F2:
+        rc = KEY_F2;
+        break;
+    case DIKS_F3:
+        rc = KEY_F3;
+        break;
+    case DIKS_F4:
+        rc = KEY_F4;
+        break;
+    case DIKS_F5:
+        rc = KEY_F5;
+        break;
+    case DIKS_F6:
+        rc = KEY_F6;
+        break;
+    case DIKS_F7:
+        rc = KEY_F7;
+        break;
+    case DIKS_F8:
+        rc = KEY_F8;
+        break;
+    case DIKS_F9:
+        rc = KEY_F9;
+        break;
+    case DIKS_F10:
+        rc = KEY_F10;
+        break;
+    case DIKS_F11:
+        rc = KEY_F11;
+        break;
+    case DIKS_F12:
+        rc = KEY_F12;
+        break;
 
-      case DIKS_PAUSE:	rc = KEY_PAUSE;		break;
+    case DIKS_BACKSPACE:
+    case DIKS_DELETE:
+        rc = KEY_BACKSPACE;
+        break;
 
-      case DIKS_EQUALS_SIGN:	rc = KEY_EQUALS;	break;
+        //   case DIKS_PAUSE:	rc = KEY_PAUSE;		break;
 
-      case DIKS_MINUS_SIGN:	rc = KEY_MINUS;		break;
+    case DIKS_EQUALS_SIGN:
+        rc = KEY_EQUALS;
+        break;
 
-      case DIKS_SHIFT:
-	rc = KEY_RSHIFT;
-	break;
-	
-      case DIKS_CONTROL:
-	rc = KEY_RCTRL;
-	break;
-	
-      case DIKS_ALT:
-      case DIKS_ALTGR:
-	rc = KEY_RALT;
-	break;
-	
-      default:
-	if (rc >= DIKS_SPACE && rc <= DIKS_TILDE)
-	    rc = rc - DIKS_SPACE + ' ';
-	if (rc >= 'A' && rc <= 'Z')
-	    rc = rc - 'A' + 'a';
-	break;
+    case DIKS_MINUS_SIGN:
+        rc = KEY_MINUS;
+        break;
+
+    case DIKS_SHIFT:
+        rc = KEY_RSHIFT;
+        break;
+
+    case SYMPOL_KEY_BACK:
+        rc = KEY_RCTRL;
+        // rc = KEY_SPACEBAR;
+
+        break;
+
+    case DIKS_ALT:
+    case DIKS_ALTGR:
+        rc = KEY_RALT;
+        break;
+
+    default:
+        if (rc >= DIKS_SPACE && rc <= DIKS_TILDE)
+            rc = rc - DIKS_SPACE + ' ';
+        if (rc >= 'A' && rc <= 'Z')
+            rc = rc - 'A' + 'a';
+        break;
     }
 
     return rc;
-
 }
 
 
-void I_StartTic (void)
+struct timeval lastReleaseTime;
+int lastKey = 0;
+
+
+void I_StartTic(void)
 {
 
     event_t event;
-    while(keybuffer->GetEvent( keybuffer, DFB_EVENT(&devt)) == DFB_OK) {
-        printf("Key event type %d code %d id %d symbol %d\n", devt.type, devt.key_code, devt.key_id, devt.key_symbol);
+    while (keybuffer->GetEvent(keybuffer, DFB_EVENT(&devt)) == DFB_OK)
+    {
+        printf("Key event type %d code %d id %d symbol %d\n", devt.type, devt.key_code, devt.key_id, devt.device_id);
 
         switch (devt.type)
         {
         case DIET_KEYPRESS:
 
-        event.type = ev_keydown;
-        event.data1 = dlatekey();
-        D_PostEvent(&event);
-        // fprintf(stderr, "k");
-        break;
-        case DIET_KEYRELEASE:
-        //printf("Key up %d\n",devt.key_symbol);
+            event.type = ev_keydown;
+            event.data1 = dlatekey();
+            D_PostEvent(&event);
 
-        event.type = ev_keyup;
-        event.data1 = dlatekey();
-        D_PostEvent(&event);
-        // fprintf(stderr, "ku");
-        break;
+            fprintf(stderr, "k");
+
+
+            break;
+
+        case DIET_KEYRELEASE:
+            printf("Key up %d\n", devt.key_symbol);
+
+            struct timeval currentTime = devt.timestamp;
+
+            int timeuse = (1000000 * (currentTime.tv_sec) + currentTime.tv_usec) - (1000000 * (lastReleaseTime.tv_sec) + lastReleaseTime.tv_usec);
+
+            // double tap
+            if ((timeuse) <= 300000)
+            {
+
+                // remapping goggle's joystick left to Enter key
+                if (dlatekey() == lastKey && lastKey == KEY_LEFTARROW)
+                {
+
+                    printf("trigge enter ");
+                    event.type = ev_keyup;
+                    event.data1 = KEY_LEFTARROW;
+                    D_PostEvent(&event);
+                    event.type = ev_keydown;
+                    event.data1 = KEY_ENTER;
+                    D_PostEvent(&event);
+                    event.type = ev_keyup;
+                    D_PostEvent(&event);
+
+                    lastReleaseTime = currentTime;
+                    lastKey = KEY_LEFTARROW;
+                    break;
+                }
+                // remapping goggle's "channel up" btn to Open/Use 
+                else if (dlatekey() == lastKey && lastKey == KEY_UPARROW)
+                {
+
+                    printf("trigge space ");
+
+                    event.type = ev_keyup;
+                    event.data1 = KEY_UPARROW;
+                    D_PostEvent(&event);
+
+                    event.type = ev_keydown;
+                    event.data1 = KEY_SPACEBAR;
+                    D_PostEvent(&event);
+
+                    lastReleaseTime = currentTime;
+                    lastKey = KEY_UPARROW;
+
+                    break;
+                }
+                // remapping goggle's "back" btn  to enable/disable god mode 
+                else if (dlatekey() == lastKey && lastKey == KEY_RCTRL)
+                {
+
+                
+                    printf("toggle god mode ");
+
+                    event.type = ev_keyup;
+                    event.data1 = KEY_RCTRL;
+                    D_PostEvent(&event);
+
+                    event.type = ev_keydown;
+
+                    event.data1 = KEY_GOD_MODE; // iddqd
+                    D_PostEvent(&event);
+
+                    lastReleaseTime = currentTime;
+                    lastKey = KEY_RCTRL;
+
+                    break;
+                }
+                 // remapping goggle's joystick right to switch between weapons
+                else if (dlatekey() == lastKey && lastKey == KEY_RIGHTARROW)
+                {
+                    printf("trigge next weapons ");
+
+                    event.type = ev_keyup;
+                    event.data1 = KEY_RIGHTARROW;
+                    D_PostEvent(&event);
+
+                    event.type = ev_keydown;
+                    event.data1 = KEY_SWITCH_WEAPONS;
+                    D_PostEvent(&event);
+
+                    lastReleaseTime = currentTime;
+                    lastKey = KEY_RIGHTARROW;
+
+                    break;
+                }
+            }
+
+            lastReleaseTime = currentTime;
+            event.type = ev_keyup;
+            event.data1 = dlatekey();
+            D_PostEvent(&event);
+            lastKey = dlatekey();
+
+            fprintf(stderr, "ku");
+            break;
         }
-        
     }
 }
 

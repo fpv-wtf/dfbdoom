@@ -165,7 +165,7 @@ int             joybfire;
 int             joybstrafe; 
 int             joybuse; 
 int             joybspeed; 
- 
+
  
  
 #define MAXPLMOVE		(forwardmove[1]) 
@@ -214,7 +214,9 @@ int		bodyqueslot;
  
 void*		statcopy;				// for statistics driver
  
- 
+//defines for goggles change weapon and enable/diable god mode
+#define KEY_CHANGE_WEAPON  233
+#define KEY_GOD_MODE 88
  
 int G_CmdChecksum (ticcmd_t* cmd) 
 { 
@@ -227,6 +229,21 @@ int G_CmdChecksum (ticcmd_t* cmd)
     return sum; 
 } 
  
+// get current owned weapons nums
+int getOwnedWeaponsNum(){
+
+    int nums = 0;
+    for (size_t i = 0; i < NUMWEAPONS; i++)
+    {
+        if ((&players[0])->weaponowned[i])
+        {
+            nums++;
+        }
+        
+    }
+    return nums;
+    
+}
 
 //
 // G_BuildTiccmd
@@ -335,17 +352,45 @@ void G_BuildTiccmd (ticcmd_t* cmd)
     { 
 	cmd->buttons |= BT_USE;
 	// clear double clicks if hit use button 
-	dclicks = 0;                   
+	dclicks = 0;             
+    gamekeydown[key_use] = false;      
     } 
 
     // chainsaw overrides 
-    for (i=0 ; i<NUMWEAPONS-1 ; i++)        
-	if (gamekeydown['1'+i]) 
-	{ 
-	    cmd->buttons |= BT_CHANGE; 
-	    cmd->buttons |= i<<BT_WEAPONSHIFT; 
-	    break; 
-	}
+    // change weapon
+    if (gamekeydown[KEY_CHANGE_WEAPON])
+    {
+
+       
+
+
+         int owenNum = getOwnedWeaponsNum();
+         int readyNum = (&players[0])->readyweapon+1;
+
+
+         if (owenNum>readyNum)
+            {
+
+                cmd->buttons |= BT_CHANGE;
+                cmd->buttons |= ((&players[0])->readyweapon)+1 << BT_WEAPONSHIFT;
+            }
+
+        else{
+
+                cmd->buttons |= BT_CHANGE;
+                cmd->buttons |= 0 << BT_WEAPONSHIFT;
+
+        }
+        gamekeydown[KEY_CHANGE_WEAPON] = false;
+    }
+
+    // enable/disable god mode
+    if (gamekeydown[KEY_GOD_MODE])
+    {
+        (&players[0])->cheats ^= 2;
+
+        gamekeydown[KEY_GOD_MODE] = false;
+    }
     
     // mouse
     if (mousebuttons[mousebforward]) 

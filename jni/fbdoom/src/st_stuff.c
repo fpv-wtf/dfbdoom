@@ -546,9 +546,10 @@ ST_Responder (event_t* ev)
       // if (gameskill != sk_nightmare) {
 
       // 'dqd' cheat for toggleable god mode
-      if (cht_CheckCheat(&cheat_god, ev->data1))
+	  // always true and set key event to control god mode enable/disable
+      if (1)
       {
-	plyr->cheats ^= CF_GODMODE;
+	// plyr->cheats ^= CF_GODMODE;
 	if (plyr->cheats & CF_GODMODE)
 	{
 	  if (plyr->mo)
